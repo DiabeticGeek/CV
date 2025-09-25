@@ -1,0 +1,865 @@
+{
+  "name": "Bouvy Hypotheek-Scan",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        864,
+        208
+      ],
+      "id": "39c3b449-ea08-4b67-a4ea-bb025464fe29",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "jlifz8ob4mlBkT3G",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ef69eee3-0f13-4278-8b87-a4639d01dcf4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -416,
+        -64
+      ],
+      "id": "e4b45b7a-4d74-42a5-a064-a23840a22f35",
+      "name": "Info Ontvangen",
+      "webhookId": "ef69eee3-0f13-4278-8b87-a4639d01dcf4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ca288122-93d7-41d2-921f-2e7841052ef8",
+              "leftValue": "={{ $json.body.lening_waarde_ratio }}",
+              "rightValue": "NHG",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        -64
+      ],
+      "id": "3e4f55bb-7d20-4e5c-adb3-8fe162ba4ea5",
+      "name": "NHG of %"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst updatedItems = items.map((item) => {\n  const lening_waarde_ratio = item.json.body.lening_waarde_ratio;\n  const energie_label = item.json.body.energie_label;\n\n  if (lening_waarde_ratio !== \"NHG\") {\n    item.json.body.lening_waarde_ratio = lening_waarde_ratio.replace(\"%\", \"\");\n  }\n\n  switch (energie_label) {\n    case \"A\":\n      item.json.body.energie_label = \"a\";\n      break;\n    case \"B\":\n      item.json.body.energie_label = \"b\";\n      break;\n    case \"C-G\":\n      item.json.body.energie_label = \"c\";\n      break;\n  }\n\n  return item;\n});\n\nreturn updatedItems;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        48
+      ],
+      "id": "1966ac67-b7bd-4a42-ae92-2da25d190824",
+      "name": "% Weghalen voor URL"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ca288122-93d7-41d2-921f-2e7841052ef8",
+              "leftValue": "={{ $json.body.hypotheek_duur }}",
+              "rightValue": "Variabel",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        -80
+      ],
+      "id": "e56021d2-f754-4567-83ec-388388d797e9",
+      "name": "Variabele Rente?"
+    },
+    {
+      "parameters": {
+        "url": "=https://www.easymortgage.nl/rates/{{ $json.body.hypotheek_duur }}-year-fixed/{{ $json.body.lening_waarde_ratio }}/{{ $json.body.energie_label }}/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        352,
+        16
+      ],
+      "id": "31487536-7a1e-4230-b3d8-a58c4f1e547c",
+      "name": "Zoeken Niet Variabele"
+    },
+    {
+      "parameters": {
+        "url": "=https://www.easymortgage.nl/rates/variable-rate/{{ $json.body.lening_waarde_ratio }}/{{ $json.body.energie_label }}/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        352,
+        -176
+      ],
+      "id": "23c3ca06-c0e2-41cd-806d-61f4622fec46",
+      "name": "Zoeken Wel Variabele"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "rateBankPairs",
+              "cssSelector": "tr.interests__item",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        -80
+      ],
+      "id": "3fcbcee6-6550-49d1-98c1-2f868198ed9b",
+      "name": "Data Extraheren"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\"rateBankPairs\" :  {{ $json.rateBankPairs }}\n\"momenteleRente\" :{{ $('Info Ontvangen').item.json.body.momentele_rente }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Compare the user's \"momenteleRente\" with the rates in \"rateBankPairs\".\nFor each bank, check if any rate is lower than \"momenteleRente\".\nReturn an array of objects with \"lender\", \"rate\", and \"rateDifference\" (in percentage points, e.g., 0.5% if \"momenteleRente\" is 3.5% and \"rate\" is 3.0%). Assume \"momenteleRente\" and rates are strings with \"%\" (e.g., \"3.5%\").\n\nIf no savings are possible, return \"na\" in the \"lender\", \"rate\" & \"rateDiffernce\" Fields\n\n\n\nOuput the data in text format, Make sure to only list better deals, Limit it to the 3 best saving oppurtinities, If there are more Leave out the rest.\n\n\"rateBankPairs\". For each bank, check if the corresponding rate is lower than \"momenteleRente\". Return an array of objects with \"lender\", \"rate\", and \"rateDifference\" (in percentage points, e.g., 0.5% if \"momenteleRente\" is 3.5% and \"rate\" is 3.0%). Assume \"momenteleRente\" and rates are strings with \"%\" (e.g., \"3.5%\"). If no savings are possible, return \"No Savings Possible\" in text format, without the \"\" ofcourse.\nOuput the data in text format, Make sure to only list better deals, Limit it to the 3 best saving oppurtinities, If there are more Leave out the rest.\n\nThe 5 percentage points given for each bank follow the following structure;\n(e.g with centraal beheer leef)\nNHG = 3.08%\n60% = 3.24%\n80% = 3.27%\n90% = 3.30%\n100% = 3.27%\n\nSo which % you choose is dependend on what value is stored in \"lening_waarde_ratio\" \nBasially if \"lening_waarde_ratio\" is equal to;\nNHG = 1st % in row\n60% = 2nd % in row\n80% = 3nd % in row\n90% = 4th % in row\n100% = 5th % in row\n\nExample Input:\n\n\"rateBankPairs\" :  [data:,] https://www.easymortgage.nl/providers/centraal-beheer/\nCentraal Beheer Leef\nLeef\n3.08%\n3.24%\n3.27%\n3.30%\n3.33%\n3.27% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2594777],[data:,] https://www.easymortgage.nl/providers/woonnu/\nWoonnu\nWoonnu\n3.12%\n3.18%\n3.28%\n3.32%\n3.42%\n3.28% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2600126],[data:,] https://www.easymortgage.nl/providers/asn-bank/\nASN Bank Bespaarhypotheek\nBespaarhypotheek\n3.11%\n3.25%\n3.31%\n3.34%\n3.35%\n3.31% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2594099],[data:,] https://www.easymortgage.nl/providers/blg-wonen/\nBLG Bespaarhypotheek\nBespaarhypotheek\n3.11%\n3.25%\n3.31%\n3.34%\n3.35%\n3.31% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2594621],[data:,] https://www.easymortgage.nl/providers/obvion/\nObvion Woon\nWoon\n3.10%\n3.27%\n3.31%\n3.34%\n3.37%\n3.31% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2597360],[data:,] https://www.easymortgage.nl/providers/regiobank/\nRegioBank Bespaarhypotheek\nBespaarhypotheek\n3.11%\n3.25%\n3.31%\n3.34%\n3.35%\n3.31% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2598167],[data:,] https://www.easymortgage.nl/providers/abn-amro/\nABN Amro Budget\nBudget\n3.31%\n3.32%\n3.37%\n3.38%\n3.41%\n3.37% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2592174],[data:,] https://www.easymortgage.nl/providers/ing/\nING\nING\n3.08%\n3.29%\n3.38%\n3.40%\n3.44%\n3.38% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2595959],[data:,] https://www.easymortgage.nl/providers/asn-bank/\nASN Bank\nASN Bank\n3.14%\n3.33%\n3.39%\n3.41%\n3.45%\n3.39% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2593937],[data:,] https://www.easymortgage.nl/providers/blg-wonen/\nBLG Wonen\nBLG Wonen\n3.14%\n3.33%\n3.39%\n3.41%\n3.45%\n3.39% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2594460],[data:,] https://www.easymortgage.nl/providers/nationale-nederlanden/\nNationale Nederlanden Nieuwbouw\nNieuwbouw\n3.11%\n3.30%\n3.40%\n3.50%\n3.55%\n3.40% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2596692],[data:,] https://www.easymortgage.nl/providers/venn-hypotheken/\nVenn Hypotheken\nVenn Hypotheken\n3.55%\n3.38%\n3.41%\n3.46%\n3.57%\n3.41% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2599439],[data:,] https://www.easymortgage.nl/providers/handelsbanken/\nHandelsbanken Woning\nWoning\n–\n3.20%\n3.45%\n3.45%\n3.45%\n3.45% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2595277],[data:,] https://www.easymortgage.nl/providers/nationale-nederlanden/\nNationale Nederlanden\nNationale Nederlanden\n3.11%\n3.35%\n3.50%\n3.55%\n3.70%\n3.50% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2596527],[data:,] https://www.easymortgage.nl/providers/abn-amro/\nABN Amro Woning\nWoning\n3.46%\n3.47%\n3.52%\n3.53%\n3.56%\n3.52% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2592369],[data:,] https://www.easymortgage.nl/providers/asr-verzekeringen/\na.s.r. DigiThuis\nDigiThuis\n–\n3.51%\n3.56%\n–\n–\n3.56% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2592056],[data:,] https://www.easymortgage.nl/providers/hypotrust/\nHypotrust Vrij Leven\nVrij Leven\n3.43%\n3.48%\n3.56%\n–\n–\n3.56% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2595749],[data:,] https://www.easymortgage.nl/providers/argenta/\nArgenta\nArgenta\n3.37%\n3.54%\n3.58%\n3.63%\n3.69%\n3.58% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2593587],[data:,] https://www.easymortgage.nl/providers/nibc/\nNIBC\nNIBC\n3.64%\n3.50%\n3.60%\n3.70%\n3.80%\n3.60% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2596891],[data:,] https://www.easymortgage.nl/providers/asr-verzekeringen/\na.s.r. WelThuis\nWelThuis\n3.51%\n3.62%\n3.63%\n3.67%\n3.71%\n3.63% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2591891],[data:,] https://www.easymortgage.nl/providers/robuust-hypotheken/\nRobuust\nRobuust\n3.54%\n3.58%\n3.66%\n3.70%\n3.79%\n3.66% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2598435],[data:,] https://www.easymortgage.nl/providers/nibc/\nNIBC Extra\nExtra\n3.74%\n3.60%\n3.70%\n3.80%\n3.90%\n3.70% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2597103],[data:,] https://www.easymortgage.nl/providers/aegon/\nAegon\nAegon\n3.59%\n3.69%\n3.71%\n3.73%\n3.78%\n3.71% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2592672],[data:,] https://www.easymortgage.nl/providers/triodos-bank/\nTriodos Bank\nTriodos Bank\n3.50%\n3.63%\n3.75%\n3.78%\n3.78%\n3.75% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2599097],[data:,] https://www.easymortgage.nl/providers/rabobank/\nRabobank Basis\nBasis\n3.69%\n3.74%\n3.84%\n3.84%\n3.89%\n3.84% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2597666],[data:,] https://www.easymortgage.nl/providers/allianz/\nAllianz\nAllianz\n3.71%\n3.80%\n3.85%\n4.08%\n5.10%\n3.85% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2593130],[data:,] https://www.easymortgage.nl/providers/rabobank/\nRabobank Plus\nPlus\n3.75%\n3.80%\n3.90%\n3.90%\n3.95%\n3.90% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2597943],[data:,] https://www.easymortgage.nl/providers/lot-hypotheken/\nLot\nLot\n4.20%\n3.90%\n4.03%\n4.12%\n4.31%\n4.03% Get free quote Free quote Get free quote\n[https://www.easymortgage.nl/request-quote/?rate=2599755]\n\n\"momenteleRente\" : 4.7%\n\"lening_waarde_ratio\" : \"{{ $('Info Ontvangen').item.json.body.lening_waarde_ratio }}\"\n\nExample output:\n{\n  \"savingOpportunity1\": {\n    \"momenteleRente\": \"4.7%\",\n    \"lender\": \"Centraal Beheer Leef\",\n    \"rate\": \"3.08%\",\n    \"rateDifference\": \"1.62%\"\n  },\n  \"savingOpportunity2\": {\n    \"momenteleRente\": \"4.7%\",\n    \"lender\": \"ING\",\n    \"rate\": \"3.08%\",\n    \"rateDifference\": \"1.62%\"\n  },\n  \"savingOpportunity3\": {\n    \"momenteleRente\": \"4.7%\",\n    \"lender\": \"Obvion Woon\",\n    \"rate\": \"3.10%\",\n    \"rateDifference\": \"1.6%\"\n  }\n}\n\n\nExample output: // ONLY IF NO SAVINGS POSSIBLE\n{\n  \"savingOpportunity1\": {\n    \"momenteleRente\": \"4.7%\",\n    \"lender\": \"na\",\n    \"rate\": \"na\",\n    \"rateDifference\": \"na\"\n  },\n  \"savingOpportunity2\": {\n    \"momenteleRente\": \"na\",\n    \"lender\": \"na\",\n    \"rate\": \"na\",\n    \"rateDifference\": \"na\"\n  },\n  \"savingOpportunity3\": {\n    \"momenteleRente\": \"na\",\n    \"lender\": \"na\",\n    \"rate\": \"na\",\n    \"rateDifference\": \"na\"\n  }\n}\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        864,
+        64
+      ],
+      "id": "b6e06aaa-2465-4b8d-9931-4b5f8c2b60dd",
+      "name": "Zoeken Naar Besparingen"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n    \"savingOpportunity1\": {\n        \"momenteleRente\": \"4.7%\",\n        \"lender\": \"Centraal Beheer Leef\",\n        \"rate\": \"3.08%\",\n        \"rateDifference\": \"1.62%\"\n    },\n    \"savingOpportunity2\": {\n        \"momenteleRente\": \"4.7%\",\n        \"lender\": \"ING\",\n        \"rate\": \"3.08%\",\n        \"rateDifference\": \"1.62%\"\n    },\n    \"savingOpportunity3\": {\n        \"momenteleRente\": \"4.7%\",\n        \"lender\": \"Obvion Woon\",\n        \"rate\": \"3.10%\",\n        \"rateDifference\": \"1.6%\"\n    }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1008,
+        208
+      ],
+      "id": "1d634903-b300-420b-9a93-20babab7d71a",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6b0a76a2-5f90-4f0e-96f8-c4330538f8c3",
+              "leftValue": "={{ $json.momentele_renteint }}",
+              "rightValue": "={{ $json.besparing1 }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1312,
+        -80
+      ],
+      "id": "140bf994-ae10-49a0-a5a1-6fef21bfb90f",
+      "name": "Besparing mogelijk?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst infoData = $(\"Info Ontvangen\").all();\nconst updatedItems = items.map((item, index) => {\n  const fullName = infoData[index]?.json?.body?.full_name;\n  if (typeof fullName === \"string\" && fullName.trim() !== \"\") {\n    // Capitalize each word in the full name\n    const capitalizedName = fullName\n      .trim()\n      .split(\" \")\n      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())\n      .join(\" \");\n    const nameParts = capitalizedName.split(\" \");\n    const firstName = nameParts[0];\n    const lastName = nameParts.slice(1).join(\" \");\n    if (firstName && lastName) {\n      item.json.firstName = firstName;\n      item.json.lastName = lastName;\n    } else if (firstName) {\n      item.json.firstName = firstName;\n      item.json.lastName = \"\";\n    }\n  }\n  return item;\n});\nreturn updatedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -80
+      ],
+      "id": "0d16f156-3e02-4062-8092-e41a256aba57",
+      "name": "Voor & Achternaam extraheren"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst updatedItems = items.map((item) => {\n  const body = item.json.body;\n  if (body && body.lening_waarde_ratio !== undefined) {\n    const lening_waarde_ratio = body.lening_waarde_ratio;\n    if (lening_waarde_ratio !== \"NHG\") {\n      item.json.body.lening_waarde_ratio = lening_waarde_ratio.replace(\"%\", \"\");\n    }\n  }\n  const momentele_rente = $input.first().json.output?.savingOpportunity1?.momenteleRente ?? \"\";\n  const besparing1 = $input.first().json.output?.savingOpportunity1?.rate ?? \"\";\n  item.json.momentele_renteint = momentele_rente.replace(\"%\", \"\");\n  item.json.besparing1 = besparing1.replace(\"%\", \"\");\n  return item;\n});\nreturn updatedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        -80
+      ],
+      "id": "bdb5a99c-abfb-4bfe-b91d-85ca7f34c04f",
+      "name": "% Weghalen voor vergelijking"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Info Ontvangen').item.json.body.email }}",
+        "subject": "=Beste {{ $('Voor & Achternaam extraheren').item.json.firstName }}, De uitslag van uw hypotheek scan.",
+        "message": "=<!DOCTYPE html>\n<html lang=\"nl\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Bouvy Advies Hypotheekscan Resultaten</title>\n  <style>\n    body {\n      margin: 0;\n      padding: 0;\n      font-family: Arial, sans-serif;\n      background-color: #f9f9f9;\n      color: #222222;\n    }\n    .container {\n      max-width: 600px;\n      margin: 20px auto;\n      background-color: #ffffff;\n      border-radius: 10px;\n      overflow: hidden;\n      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n    }\n    .header {\n      background-color: rgb(178, 133, 106);\n      padding: 20px;\n      text-align: center;\n    }\n    .header img {\n      max-width: 150px;\n    }\n    .content {\n      padding: 30px;\n    }\n    h1 {\n      color: #222222;\n      font-size: 24px;\n      margin-bottom: 20px;\n    }\n    p {\n      font-size: 12px;\n      line-height: 18px;\n      margin-bottom: 20px;\n    }\n    .cta-button {\n      display: inline-block;\n      padding: 12px 24px;\n      background-color: #003a33;\n      color: #ffffff;\n      text-decoration: none;\n      border-radius: 0;\n      font-weight: 500;\n      font-size: 15px;\n    }\n    .cta-button:hover {\n      background-color: #002a25;\n    }\n    .footer {\n      background-color: #f9f9f9;\n      padding: 20px;\n      text-align: center;\n      font-size: 12px;\n      color: #222222;\n    }\n    .footer a {\n      color: #003a33;\n      text-decoration: underline;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <img src=\"https://www.bouvy.nl/wp-content/uploads/2020/02/logo_bouvy-advies.png\" alt=\"Bouvy Advies Logo\">\n    </div>\n    <div class=\"content\">\n      <h1>Beste {{ $('Voor & Achternaam extraheren').item.json.firstName }},</h1>\n      <p>Bedankt voor het aanvragen van de gratis Hypotheekscan bij Bouvy Advies. Na analyse van jouw huidige rente ({{ $json.momentele_renteint }}%) en de beschikbare tarieven, zijn er op dit moment geen besparingsmogelijkheden gevonden.</p>\n      <p>Geen zorgen! We houden de markt in de gaten en adviseren je om de scan over een paar maanden opnieuw te doen. Mocht je andere vragen hebben, neem gerust contact op.</p>\n      <a href=\"https://www.bouvy.nl/contact/\" class=\"cta-button\">Neem contact op</a>\n    </div>\n    <div class=\"footer\">\n      <p>Bouvy Advies | Jouw vertrouwde adviseur voor hypotheken en verzekeringen<br>\n      <a href=\"https://www.bouvy.nl\">www.bouvy.nl</a> | <a href=\"mailto:info@bouvy.nl\">info@bouvy.nl</a></p>\n      <p><a href=\"https://www.bouvy.nl/nieuwsbrief/\">Schrijf je in voor onze nieuwsbrief</a> voor meer bespaartips!</p>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1456,
+        224
+      ],
+      "id": "79e71e25-7cf4-4447-99a0-6d8c76f5073b",
+      "name": "Email geen besparing mogelijk",
+      "webhookId": "cca8c690-9920-4c5a-bfaf-779342b0fec4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "CFWwH1vPHFJW9KWa",
+          "name": "info@AiWebSolutions.nl"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "17-1nuq76w-CzehbsDeXYkhEQhsjbQ6bBVQOti6BSXgU",
+          "mode": "list",
+          "cachedResultName": "Bouvy Scan",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17-1nuq76w-CzehbsDeXYkhEQhsjbQ6bBVQOti6BSXgU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Resultaten",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17-1nuq76w-CzehbsDeXYkhEQhsjbQ6bBVQOti6BSXgU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $('Info Ontvangen').item.json.body.email }}",
+            "momenteleRente": "={{ $json.output.savingOpportunity1.momenteleRente }}",
+            "leningVerstrekker1": "={{ $json.output.savingOpportunity1.lender }}",
+            "betereRente1": "={{ $json.output.savingOpportunity1.rate }}",
+            "verschil1": "={{ $json.output.savingOpportunity1.rateDifference }}",
+            "leningVerstrekker2": "={{ $json.output.savingOpportunity2.lender }}",
+            "betereRente2": "={{ $json.output.savingOpportunity2.rate }}",
+            "verschil2": "={{ $json.output.savingOpportunity2.rateDifference }}",
+            "leningVerstrekker3": "={{ $json.output.savingOpportunity3.lender }}",
+            "betereRente3": "={{ $json.output.savingOpportunity3.rate }}",
+            "verschil3": "={{ $json.output.savingOpportunity3.rateDifference }}",
+            "Volledige Naam": "={{ $('Voor & Achternaam extraheren').item.json.firstName }} {{ $('Voor & Achternaam extraheren').item.json.lastName }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Volledige Naam",
+              "displayName": "Volledige Naam",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "momenteleRente",
+              "displayName": "momenteleRente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "leningVerstrekker1",
+              "displayName": "leningVerstrekker1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "betereRente1",
+              "displayName": "betereRente1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "verschil1",
+              "displayName": "verschil1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "leningVerstrekker2",
+              "displayName": "leningVerstrekker2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "betereRente2",
+              "displayName": "betereRente2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "verschil2",
+              "displayName": "verschil2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "leningVerstrekker3",
+              "displayName": "leningVerstrekker3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "betereRente3",
+              "displayName": "betereRente3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "verschil3",
+              "displayName": "verschil3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1584,
+        -96
+      ],
+      "id": "686870a4-5f4a-46a6-9e8b-b97f7b4ff3c3",
+      "name": "Bespaar mogelijkheden in sheets opslaan",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UxzKmtr7ulLHwHJN",
+          "name": "Ralph Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Info Ontvangen').item.json.body.email }}",
+        "subject": "=Beste {{ $('Voor & Achternaam extraheren').item.json.firstName }}, De uitslag van uw hypotheek scan.",
+        "message": "=<!DOCTYPE html>\n<html lang=\"nl\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Bouvy Advies Hypotheekscan Resultaten</title>\n  <style>\n    body {\n      margin: 0;\n      padding: 0;\n      font-family: Arial, sans-serif;\n      background-color: #f9f9f9;\n      color: #222222;\n    }\n    .container {\n      max-width: 600px;\n      margin: 20px auto;\n      background-color: #ffffff;\n      border-radius: 10px;\n      overflow: hidden;\n      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n    }\n    .header {\n      background-color: rgb(178, 133, 106);\n      padding: 20px;\n      text-align: center;\n    }\n    .header img {\n      max-width: 150px;\n    }\n    .content {\n      padding: 30px;\n    }\n    h1 {\n      color: #222222;\n      font-size: 24px;\n      margin-bottom: 20px;\n    }\n    p {\n      font-size: 12px;\n      line-height: 18px;\n      margin-bottom: 20px;\n    }\n    .results-table {\n      width: 100%;\n      border-collapse: collapse;\n      margin-bottom: 20px;\n    }\n    .results-table th, .results-table td {\n      border: 1px solid #ddd;\n      padding: 12px;\n      text-align: left;\n    }\n    .results-table th {\n      background-color: #003a33;\n      color: #ffffff;\n    }\n    .cta-button {\n      display: inline-block;\n      padding: 12px 24px;\n      background-color: #003a33;\n      color: #ffffff;\n      text-decoration: none;\n      border-radius: 0;\n      font-weight: 500;\n      font-size: 15px;\n    }\n    .cta-button:hover {\n      background-color: #002a25;\n    }\n    .footer {\n      background-color: #f9f9f9;\n      padding: 20px;\n      text-align: center;\n      font-size: 12px;\n      color: #222222;\n    }\n    .footer a {\n      color: #003a33;\n      text-decoration: underline;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <img src=\"https://www.bouvy.nl/wp-content/uploads/2020/02/logo_bouvy-advies.png\" alt=\"Bouvy Advies Logo\">\n    </div>\n    <div class=\"content\">\n      <h1>Beste {{ $('Voor & Achternaam extraheren').item.json.firstName }},</h1>\n      <p>Bedankt voor het aanvragen van de gratis Hypotheekscan bij Bouvy Advies. Hieronder vind je de resultaten van jouw hypotheekscan. We hebben jouw huidige rente vergeleken met de actuele tarieven om te zien of je kunt besparen.</p>\n      \n      <h2>Jouw Hypotheekscan Resultaten</h2>\n      <p>Uw huidige rente: {{ $json.momenteleRente }}</p>\n      \n      <table class=\"results-table\">\n        <tr>\n          <th>Leningverstrekker</th>\n          <th>Rente</th>\n          <th>Verschil</th>\n        </tr>\n        <tr>\n          <td>{{ $('Zoeken Naar Besparingen').item.json.output.savingOpportunity1.lender }}</td>\n          <td>{{ $('Zoeken Naar Besparingen').item.json.output.savingOpportunity1.rate }}</td>\n          <td>{{ $('Zoeken Naar Besparingen').item.json.output.savingOpportunity1.rateDifference }}</td>\n        </tr>\n        <tr>\n          <td>{{ $('Zoeken Naar Besparingen').item.json.output.savingOpportunity2.lender }}</td>\n          <td>{{ $('Zoeken Naar Besparingen').item.json.output.savingOpportunity2.rate }}</td>\n          <td>{{ $('Zoeken Naar Besparingen').item.json.output.savingOpportunity2.rateDifference }}</td>\n        </tr>\n        <tr>\n          <td>{{ $('Zoeken Naar Besparingen').item.json.output.savingOpportunity3.lender }}</td>\n          <td>{{ $('Zoeken Naar Besparingen').item.json.output.savingOpportunity3.rate }}</td>\n          <td>{{ $('Zoeken Naar Besparingen').item.json.output.savingOpportunity3.rateDifference }}</td>\n        </tr>\n      </table>\n\n      <p>Als deze besparingen interessant zijn, kunnen we een pré-adviesgesprek inplannen om de mogelijkheden verder te bespreken.</p>\n      \n      <a href=\"https://www.bouvy.nl/contact/\" class=\"cta-button\">Neem contact op</a>\n    </div>\n    <div class=\"footer\">\n      <p>Bouvy Advies | Jouw vertrouwde adviseur voor hypotheken en verzekeringen<br>\n      <a href=\"https://www.bouvy.nl\">www.bouvy.nl</a> | <a href=\"mailto:info@bouvy.nl\">info@bouvy.nl</a></p>\n      <p><a href=\"https://www.bouvy.nl/contact/\">Schrijf je in voor onze nieuwsbrief</a> voor meer bespaartips!</p>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1776,
+        -96
+      ],
+      "id": "8dbbf0f6-eaf6-41ef-8918-3f2b872e8f5b",
+      "name": "Besparings mogelijkheden opsturen",
+      "webhookId": "cca8c690-9920-4c5a-bfaf-779342b0fec4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "CFWwH1vPHFJW9KWa",
+          "name": "info@AiWebSolutions.nl"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Dutch mortage rate improvement scan."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -368
+      ],
+      "id": "57ee1721-b4d8-4293-bd07-0716b7faec4a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Receive data from form submission",
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        -128
+      ],
+      "id": "e97aca3f-edb9-49dc-8519-4b4a913e030f",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Determine LTV",
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -128
+      ],
+      "id": "81d33918-9589-4d82-9876-a5e21bcd393d",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Light data formatting",
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "7dae54eb-e393-4892-a0c2-e8e24839af79",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Stable or Variable rates?",
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        144,
+        -144
+      ],
+      "id": "0c5ff56e-e8c0-417e-8c3d-bce14359d8ef",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "Checking competitors\n",
+        "height": 80,
+        "width": 182
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        320,
+        -48
+      ],
+      "id": "b61108f9-a715-4f38-bd7e-eeea4f2618ee",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "Extract relevant data",
+        "height": 176,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        512,
+        -144
+      ],
+      "id": "6af034d0-78d8-441c-b990-27102b0d7f89",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "Save Form Submitter name",
+        "height": 176,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -160
+      ],
+      "id": "1bf038e1-192f-4ffe-bf60-70a83abdb53d",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "Light data formatting",
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -128
+      ],
+      "id": "1885656b-1237-4e1d-b393-a7f09a25c729",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "Scanning for saving oppurtunities",
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -16
+      ],
+      "id": "754b0d76-e794-427a-a7aa-8ab66264aeb8",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "Save Saving oppurtunities in google sheet along with the name & info of the person who submitted the scan.\n\nsend an e-mail with the saving oppurtunities.",
+        "height": 352,
+        "width": 406
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        -288
+      ],
+      "id": "7944ce01-4c0f-481f-bd6c-116978fac6af",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "Send an email letting the submitter know they have optimal rates",
+        "height": 208,
+        "width": 166
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        112
+      ],
+      "id": "afa7811a-d302-4108-bb46-80bbe61fe1ad",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "Savings Possible?",
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        -144
+      ],
+      "id": "57304bc7-eabb-4b7b-bc3b-356043117f8b",
+      "name": "Sticky Note12"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Zoeken Naar Besparingen",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Info Ontvangen": {
+      "main": [
+        [
+          {
+            "node": "NHG of %",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NHG of %": {
+      "main": [
+        [
+          {
+            "node": "Variabele Rente?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "% Weghalen voor URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "% Weghalen voor URL": {
+      "main": [
+        [
+          {
+            "node": "Variabele Rente?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Variabele Rente?": {
+      "main": [
+        [
+          {
+            "node": "Zoeken Wel Variabele",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Zoeken Niet Variabele",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoeken Niet Variabele": {
+      "main": [
+        [
+          {
+            "node": "Data Extraheren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoeken Wel Variabele": {
+      "main": [
+        [
+          {
+            "node": "Data Extraheren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Extraheren": {
+      "main": [
+        [
+          {
+            "node": "Voor & Achternaam extraheren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Zoeken Naar Besparingen",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoeken Naar Besparingen": {
+      "main": [
+        [
+          {
+            "node": "% Weghalen voor vergelijking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Besparing mogelijk?": {
+      "main": [
+        [
+          {
+            "node": "Bespaar mogelijkheden in sheets opslaan",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email geen besparing mogelijk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voor & Achternaam extraheren": {
+      "main": [
+        [
+          {
+            "node": "Zoeken Naar Besparingen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "% Weghalen voor vergelijking": {
+      "main": [
+        [
+          {
+            "node": "Besparing mogelijk?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bespaar mogelijkheden in sheets opslaan": {
+      "main": [
+        [
+          {
+            "node": "Besparings mogelijkheden opsturen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ba207e16-aa65-466c-b9ce-44be27d10d22",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8d8bf94a246b50082da2a0a8ca8423cdbf757248e37fe81ee3bef5222289f1a0"
+  },
+  "id": "9169Mtgrch5KbD3F",
+  "tags": []
+}
