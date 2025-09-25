@@ -1,0 +1,1418 @@
+{
+  "name": "DUITS EMAIL & Phantombuster",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2656,
+        352
+      ],
+      "id": "8027bd06-7e7a-492d-8c30-2893a2d07fb1",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -2000,
+        352
+      ],
+      "id": "24ee5558-c34e-46c2-8f5f-20926e76e950",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1lhm_FMBkIc5CXMtAYqhFaygANaF6DARaFXAG-k1nERs",
+          "mode": "list",
+          "cachedResultName": "Content marketing",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lhm_FMBkIc5CXMtAYqhFaygANaF6DARaFXAG-k1nERs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1075213430,
+          "mode": "list",
+          "cachedResultName": "result (12)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lhm_FMBkIc5CXMtAYqhFaygANaF6DARaFXAG-k1nERs/edit#gid=1075213430"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -2448,
+        352
+      ],
+      "id": "b7090092-eda6-450e-988c-0982f03658ad",
+      "name": "Get Leads",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jzLQl5PkFuGq82MG",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "78d4d79b-235c-4cef-87d0-877f9117448b",
+              "leftValue": "={{ $json.fullName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "f6d9f990-a2b7-4f98-b45b-7a945796c37b",
+              "leftValue": "={{ $json.companyName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "4960b388-3723-49f7-879c-f9778b86a6fe",
+              "leftValue": "={{ $json.row_number }}",
+              "rightValue": 1400,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "c95b91d4-29b4-45cc-893c-e7a0f6d93084",
+              "leftValue": "={{ $json.row_number }}",
+              "rightValue": 1600,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -2208,
+        352
+      ],
+      "id": "fa31f5dd-6d17-4376-9bb5-b81f034624f9",
+      "name": "Filter Leads Without Necessary Info"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are an expert, inteligent writing asistent.",
+              "role": "system"
+            },
+            {
+              "content": "Properly format the name. Remove emojis if present and fix capitalization. Only output the name."
+            },
+            {
+              "content": "Eva Brouwer⭐️🎤"
+            },
+            {
+              "content": "Eva Brouwer",
+              "role": "assistant"
+            },
+            {
+              "content": "✅ Yvonne Braakman-Oudshoorn LLM Mfn"
+            },
+            {
+              "content": "Yvonne Braakman-Oudshoorn",
+              "role": "assistant"
+            },
+            {
+              "content": "Arnold ✔️ Van Wijnbergen"
+            },
+            {
+              "content": "Arnold Van Wijnbergen",
+              "role": "assistant"
+            },
+            {
+              "content": "Hamed Noori 🟥"
+            },
+            {
+              "content": "Hamed Noori",
+              "role": "assistant"
+            },
+            {
+              "content": "={{ $('Get Leads').item.json.fullName }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 256
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1776,
+        368
+      ],
+      "id": "077388c6-d052-4374-af8b-8876fe2a1186",
+      "name": "Format Name",
+      "credentials": {
+        "openAiApi": {
+          "id": "jlifz8ob4mlBkT3G",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst openAIData = $(\"Format Name\").all();\n\nconst updatedItems = items.map((item, index) => {\n  const fullName = openAIData[index]?.json?.message?.content;\n  if (typeof fullName === \"string\" && fullName.trim() !== \"\") {\n    // Split the full name into an array of words\n    const nameParts = fullName.trim().split(\" \");\n    // Take the first word as firstName\n    const firstName = nameParts[0];\n    // Join all remaining words as lastName\n    const lastName = nameParts.slice(1).join(\" \");\n    // Only assign if both firstName and lastName are non-empty\n    if (firstName && lastName) {\n      item.json.firstName = firstName;\n      item.json.lastName = lastName;\n    } else if (firstName) {\n      // If no lastName (e.g., single-word name), assign only firstName\n      item.json.firstName = firstName;\n      item.json.lastName = \"\";\n    }\n  }\n  return item;\n});\n\nreturn updatedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1488,
+        368
+      ],
+      "id": "5ce311a8-3146-4980-9dbb-22e5ed6d19f9",
+      "name": "Set First Name and Last Name"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Je bent een geavanceerd taalmodel met de taak om zeer gepersonaliseerde, informele maar professionele ijsbrekers van één zin te genereren voor koude outreach-e-mails. \n\nJe ontvangt gestructureerde invoergegevens van een LinkedIn-profiel van een lead, inclusief de volledige naam, bedrijfsnaam, functietitel, profielsamenvatting en een beschrijving van de functietitel. \n\nJe doel is om een vriendelijke, oprechte en professionele ijsbreker te maken met behulp van deze informatie, gericht op één belangrijk detail. \n\nDe ijsbreker moet persoonlijk en relevant aanvoelen voor de professionele achtergrond van de lead, zonder overdreven vleiend of generiek te zijn. \n\nGebruik de volgende richtlijnen bij het genereren van de ijsbreker:\n\nToon en taalbeperkingen:\n•  De toon moet informeel, vriendelijk en toegankelijk zijn, met een professionele touch.\n•  Vermijd uitroeptekens en overdrijving.\n•  Houd de ijsbreker beperkt tot één zin die de lead betrekt door iets specifieks te noemen over hun rol, prestaties of professionele focus.\n\n•  Vermijd generieke uitspraken of complimenten, tenzij ze direct gekoppeld zijn aan iets echt indrukwekkends.\n\n•  Noem nooit milieu, klimaatverandering of gebruik de volgende woorden: Conversie(s), Converteren, Diversiteit, Faciliteren, Ik merkte, Maar ik merkte, Maar ik moet zeggen, Implementeren, INTEGREREN, Benutten, Optimalisatie, Optimaliseren, Strategie, strategiseren, GEBRUIKEN, Analytics, Beste Praktijken, Bots, Brainstorm, Capaciteit, Centrisch, Uitgebreid, Uitvoeren, CPA, ROI, CRM, CTR, ROAS, KPI, Opleveringen, Empower, Boeiend, Betrokkenheid, Kader, Verhogen, Inzicht, Metrics, Monetiseren, Niche, Observatie, Onboarding, Draaien, Publiceren, PUBLICEREN, GEKWALIFICEERD, Middel, TOEWIJZING, Schaalbaarheid, Sociale Bewijzen, Stroomlijnen, Duurzaamheid, Duurzaam, Synergie, Op maat, Waardepropositie, Toegevoegde waarde, Werkstroom.\n\n•  Begin niet met “Ik merkte” of variaties zoals “Maar ik merkte” of “Maar ik moet zeggen”.\n\n•  Vermijd uitspraken over klantenservice, betrouwbaarheid of klanttevredenheid.\n\n•  Maak geen onoprecht of overdreven complimenten - houd het oprecht en specifiek.\n\n•  Vermijd zinnen zoals “Ik wil connecten” of “Ik ben gepassioneerd”.\n\nPersonalisatie en specificiteit:\n•  Focus op één belangrijk detail uit de verstrekte invoergegevens, zoals een indrukwekkend project, een prestatie of iets specifieks voor hun rol of bedrijf.\n\n•  Zorg ervoor dat de ijsbreker aansluit bij het professionele werk van de lead zonder te generiek te klinken.\n•  Maak het zo uniek en gepersonaliseerd mogelijk zonder alleen de functietitel/titelbeschrijving/samenvatting te herhalen.\n\n•  Voeg een persoonlijke touch toe.\n\n•  Gebruik een informele, gepersonaliseerde afsluiting, zoals “Dacht, laat ik even contact opnemen”, om het bericht ontspannen en niet-opdringerig te houden.\n\nLengte en structuur:\n•  De ijsbreker moet één zin zijn.\n•  De zin moet eindigen met een zin die informeel belang uitdrukt, zoals “Dacht, laat ik even contact opnemen”, of vergelijkbare variaties.\n\nVoorbeelden:\n1.  Invoergegevens: \n{“fullName”: “Guusje Benthe”,\n “companyName”: “Georgies Cinq”,\n “title”: “Business Owner”,\n “summary”: “”,\n “titleDescription”: “”} \nUITVOER: {“icebreaker”: “Hey Guusje,\\\\n\\\\n tof hoe je met Georgies Cinq zo’n eigen sfeer neerzet in Amsterdam. Ziet er stijlvol uit — dacht, laat ik even contact opnemen.”}\n\n2.  Invoergegevens: \n{“fullName”: “Peter de Rooij”,\n “companyName”: “Locael Restaurants”,\n “title”: “Gastheer en Eigenaar”,\n “summary”: “”,\n “titleDescription”: “Locael Centraal in Haarlem en Locael Bloemendaal”} \nUITVOER: {“icebreaker”: “Hey Peter,\\\\n\\\\nJe rol als gastheer en eigenaar van Locael in Haarlem en Bloemendaal klinkt als een unieke kans om een geweldige sfeer te creëren voor je gasten, dacht ik laat ik even contact opnemen.”}\n\nGebruik altijd \\\\n voor nieuwe regels. En geef uitvoering in JSON-formaat. Belangrijk: Geef uitvoer als een geldig JSON-object. ALLE regelafbrekingen moeten worden uitgedrukt als \\\\n\\\\n, en speciale tekens (zoals aanhalingstekens) moeten correct worden geëscaped. Gebruik geen slimme aanhalingstekens. Wikkel de gehele uitvoer niet in een string.\n\npreoccupaties worden met een preoccupatie van de uitgaven gemoeid, zoals blijkt uit de voorgaande voorbeelden.",
+              "role": "system"
+            },
+            {
+              "content": "{\n  \"fullName\": \"Marcel Herben\",\n  \"companyName\": \"MKB-adviesraad\",\n  \"title\": \"Oprichter\",\n  \"summary\": \"Groei realiseren vanuit rust, overzicht en regie?\n\nVeel ondernemers denken dat groei betekent: meer doen. Meer klanten, meer marketing, meer drukte. Maar echte, duurzame groei begint met één cruciale vraag:\n\n➡ Heb jij een strategische koers die écht bij jou past?\n\nAls ondernemer bevind je je dagelijks in een complexe mix van kansen, obstakels en keuzes. Je bent de motor van je bedrijf—maar wie zorgt ervoor dat jij strategisch blijft sturen?\n\nIk help MKB-ondernemers richting en ritme aan te brengen in hun bedrijf, zodat ze niet harder, maar slimmer groeien. Geen standaardmodellen, maar maatwerkstrategieën die aansluiten op jouw potentieel, jouw markt en jouw ambities.\n\nWat ik doe:\nMet een achtergrond in de topsport, corporate strategie én jarenlange ervaring als businesscoach begeleid ik ondernemers die hun bedrijf willen professionaliseren, schaalbaar maken en toekomstbestendig willen laten groeien. Dat doe ik op drie manieren:\n\n✔ MKB Adviesraad | Intervisiegroepen\nStrategische sparringsessies in een groep van gelijkgestemde ondernemers. Geen vrijblijvende praat, maar scherpte, structuur en reflectie. Samen werk je aan strategische keuzes, leiderschap en groeivraagstukken.\n\n✔ 1:1 Businesscoaching\nIndividuele begeleidingstrajecten waarin we je strategische routekaart ontwikkelen, knelpunten oplossen en groeikansen concreet maken. Gericht op impact en actie, niet op plannen die in de la verdwijnen.\n\n✔ Strategisch advies op maat\nAls externe sparringpartner help ik je kritisch kijken naar je positionering, processen en groeistrategie. Of het nu gaat om schaalbaarheid, marktuitbreiding of winstoptimalisatie—ik help je navigeren met een heldere blik.\n\nVoor wie?\nJe bent MKB-ondernemer en je voelt: het kan beter, anders of slimmer.\nJe wilt minder operationele druk en meer regie.\nJe zoekt rust, overzicht en een plan waar je écht op kunt bouwen.\nJe wilt groeien—maar wel op jouw voorwaarden.\n\nKlaar om de volgende stap te zetten in jouw ondernemersreis?\",\n  \"titleDescription\": \"De MKB-adviesraad brengt maandelijks ZZP en MKB ondernemers in een intervisie groep bijelkaar om in een vaste structuur van elkaar te leren en bij te dragen aan ieders zakelijke succes.\"\n}"
+            },
+            {
+              "content": "{\"icebreaker\": \"Hey Marcel,\\\\n\\\\nJe combinatie van topsportmentaliteit en strategisch advies voor MKB'ers sprong er echt uit. Vooral je focus op groeien zonder harder te werken sprak me aan ik dacht ik stuur je even een berichtje.\"}",
+              "role": "assistant"
+            },
+            {
+              "content": "={\n  \"fullName\": {{ $('Format Name').item.json.message.content }},\n  \"comapnyName\": {{ $('Get Leads').item.json.companyName }},\n  \"title\":{{ $('Get Leads').item.json.title }},\n  \"titleDescription\": {{ $('Get Leads').item.json.titleDescription }},\n\"summary\":{{ $('Get Leads').item.json.summary }}\n}\n"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "maxTokens": 256,
+          "temperature": 1,
+          "topP": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -544,
+        304
+      ],
+      "id": "5a3eeb98-aa7f-4816-8bea-ee7452fc0cbc",
+      "name": "Create Icebreaker First Path",
+      "credentials": {
+        "openAiApi": {
+          "id": "jlifz8ob4mlBkT3G",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.instantly.ai/api/v2/leads",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n\"campaign\":\"\",\n\"email\":\"{{ $('Find E-mail').item.json.results.email}}\",\n\"last_name\":\"{{ $('Set First Name and Last Name').item.json.lastName }}\",\n\"first_name\":\"{{ $('Set First Name and Last Name').item.json.firstName }}\",\n\"company_name\":\"{{ $('Get Leads').item.json.companyName}}\",\n\"skip_if_in_campaign\":true,\n\"custom_variables\": { \n\"icebreaker\": {{ $json.icebreaker }}\n}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -64,
+        304
+      ],
+      "id": "4c6ec337-8d67-4d32-82e2-9f4ace4db45a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "51f18abc-58e3-4c0c-a006-554a774e60bb",
+              "name": "icebreaker",
+              "value": "=\"{{ $('Create Icebreaker First Path').item.json.message.content.icebreaker }}\"",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -256,
+        304
+      ],
+      "id": "32e35163-8da5-41fa-b612-9c20c50a3949",
+      "name": "Set Icebreaker"
+    },
+    {
+      "parameters": {
+        "content": "Imports Leads from Google sheet file, ",
+        "height": 168,
+        "width": 166,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2480,
+        272
+      ],
+      "id": "2af33a65-8475-4d0e-a14a-98125a6c0a94",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.neverbounce.com/v4/single/check?key=",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"email\": \"{{ $('Find E-mail').item.json.results.email }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -928,
+        320
+      ],
+      "id": "ce7ff341-7906-486b-8d87-243c00904124",
+      "name": "Neverbounce"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "22d8ad27-aefb-4079-8bdd-ee71c70b25d6",
+              "leftValue": "={{ $json.result }}",
+              "rightValue": "invalid",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "f780bd6c-4b41-407d-8786-2e39522d2fab",
+              "leftValue": "={{ $json.result }}",
+              "rightValue": "disposable",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "bbcbecac-6289-4815-9e09-01c6d16a053f",
+              "leftValue": "={{ $json.result }}",
+              "rightValue": "unkown",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "ae6ffb95-40ca-4cb5-8a10-7e1b59db4cb4",
+              "leftValue": "={{ $json.result }}",
+              "rightValue": "toxic",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "2818fd14-bb52-4227-a8e6-81340d6a4302",
+              "leftValue": "=\"{{ $json.flags }}\"",
+              "rightValue": "\"accepts_all\": true",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -752,
+        320
+      ],
+      "id": "b5333ef3-dbf2-458c-8f03-5fd39250c25c",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "content": "Determine Batch Size\n",
+        "height": 168,
+        "width": 160,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2240,
+        272
+      ],
+      "id": "6d053ae0-febf-4be2-85f2-c17611a7669f",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Name Formatting\n(Remove Emojis etc.)\n",
+        "height": 168,
+        "width": 224,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1776,
+        288
+      ],
+      "id": "c50870b7-461b-4f41-8cd0-3bf42ddacaec",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "Save\nFirstName \n& \nLastName",
+        "height": 168,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        272
+      ],
+      "id": "72e17e7b-2d08-4626-a976-47d50781329a",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "Find E-mail using anymailfinder",
+        "height": 168,
+        "width": 160,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1344,
+        272
+      ],
+      "id": "e17db8f8-7b13-4bbf-abc0-214ed96c5149",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "Save Lead info & Icebreaker in seperate sheet for later contact via Linkedin outreach automation",
+        "height": 184,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        736
+      ],
+      "id": "5d9a0f60-f9d0-44f0-9bd8-452cbcd7ddd1",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "Email Found?\nYes = Pocceed\nNo  = Create Linkedin Icebreaker",
+        "height": 168,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1168,
+        256
+      ],
+      "id": "90e2ff5d-9e8b-4466-a4ba-b2a04abac438",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "22d8ad27-aefb-4079-8bdd-ee71c70b25d6",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9fffae4b-4fe1-46de-ac4c-5cde2be1e660",
+              "leftValue": "={{ $json.results.validation }}",
+              "rightValue": "valid",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1136,
+        368
+      ],
+      "id": "6419ca95-0ee6-4541-8bcb-2675e704c657",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "content": "Email Security Check",
+        "height": 168,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        240
+      ],
+      "id": "0704fcb7-842a-431e-9e12-cd029db04c7f",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "Secure Email?\nYes = Procceed\nNo = Create Linkedin Icebreaker",
+        "height": 168,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        224
+      ],
+      "id": "8e7170d9-40b7-4a22-b062-0d11bd4225ed",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "Icebreaker & Email -> CRM (Instantly.ai)\n",
+        "height": 168,
+        "width": 160,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        240
+      ],
+      "id": "9bf3d251-0f2c-4b92-ba51-8b23d359b034",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Je bent een geavanceerd taalmodel dat gepersonaliseerde, informele maar professionele ijsbrekers genereert voor LinkedIn verbindingsverzoeken via PhantomBuster. Je ontvangt gestructureerde invoergegevens van een LinkedIn-profiel van een lead, inclusief naam, bedrijfsnaam, functietitel, samenvatting en titelomschrijving.\n\nJe taak is om een natuurlijke, één-zin lange icebreaker te maken die:\n– Iets echts en relevants noemt uit de input\n– Kort informeel is, met een subtiele haak naar een gesprek\n– Geen verkooptaal of generieke complimenten bevat\n– De lezer het gevoel geeft dat je écht zijn profiel hebt gelezen\n– Maximaal 195 tekens is (geen regelafbrekingen, geen begroeting aan begin)\n\n🎯 Belangrijk:\n• Voeg **indien logisch** een kleine open vraag of gedachte toe om gesprek te openen\n• Gebruik géén verboden woorden (zoals: strategie, optimalisatie, benutten, enz.)\n• Sluit af met een informele noot zoals: \"dacht, laat ik even contact opnemen\"\n• Houd het menselijk, vriendelijk en inhoudelijk relevant\n• Output moet een **geldig JSON-object zijn zonder regelafbrekingen**, bv:\n  `{\"icebreaker\": \"Hey [voornaam], tof hoe je ondernemers helpt om vanuit rust te groeien – hoe reageren ze meestal op dat idee? Dacht, laat ik even contact opnemen.\"}`\n\nInputvelden:\n- Naam: {{ $json.fullName }}\n- Bedrijf: {{ $json.companyName }}\n- Titel: {{ $json.title }}\n- Samenvatting: {{ $json.summary }}\n- Titelomschrijving: {{ $json.titleDescription }}\n\nOutput als JSON: één regel, correct geescaped, zonder enter of newline.\n",
+              "role": "system"
+            },
+            {
+              "content": "={\n  \"fullName\": \"Rick Centeno\",\n  \"companyName\": \"German Digital Advisory Board Members\",\n  \"title\": \"Digital Advisory Board Member / Digitaler Beirat\",\n  \"summary\": \"Professional C-level executive with over 25 years of proven track record in building global businesses in complex environments. Last decade mainly worked within internet/telecoms and financial services companies as CEO/MD and CTO/Change Agent. Acted also as non-executive board member in various high-tech companies operating under severe financial pressure.\n\",\n  \"titleDescription\": \"Expert member for advisory boards focusing on digital transformation of core processes, business model and customer interaction. Supporting managing directors and shareholders as sparring partner in their strategy execution. The German Digital Advisory Council is the umbrella brand for senior advisors with special focus on digitization. As independent advisors in the board, we always act in the interest of the company.\"\n}"
+            },
+            {
+              "content": "{\"icebreaker\": \"Hey Rick, boeiend hoe je als board advisor digitalisering aanjaagt – benieuwd hoe je kijkt naar AI in strategische besluitvorming. Dacht, laat ik even contact opnemen.\"}\n",
+              "role": "assistant"
+            },
+            {
+              "content": "={\n  \"fullName\": \"Marcel Herben\",\n  \"companyName\": \"MKB-adviesraad\",\n  \"title\": \"Oprichter\",\n  \"summary\": \"Groei realiseren vanuit rust, overzicht en regie?\n\nVeel ondernemers denken dat groei betekent: meer doen. Meer klanten, meer marketing, meer drukte. Maar echte, duurzame groei begint met één cruciale vraag:\n\n➡ Heb jij een strategische koers die écht bij jou past?\n\nAls ondernemer bevind je je dagelijks in een complexe mix van kansen, obstakels en keuzes. Je bent de motor van je bedrijf—maar wie zorgt ervoor dat jij strategisch blijft sturen?\n\nIk help MKB-ondernemers richting en ritme aan te brengen in hun bedrijf, zodat ze niet harder, maar slimmer groeien. Geen standaardmodellen, maar maatwerkstrategieën die aansluiten op jouw potentieel, jouw markt en jouw ambities.\n\nWat ik doe:\nMet een achtergrond in de topsport, corporate strategie én jarenlange ervaring als businesscoach begeleid ik ondernemers die hun bedrijf willen professionaliseren, schaalbaar maken en toekomstbestendig willen laten groeien. Dat doe ik op drie manieren:\n\n✔ MKB Adviesraad | Intervisiegroepen\nStrategische sparringsessies in een groep van gelijkgestemde ondernemers. Geen vrijblijvende praat, maar scherpte, structuur en reflectie. Samen werk je aan strategische keuzes, leiderschap en groeivraagstukken.\n\n✔ 1:1 Businesscoaching\nIndividuele begeleidingstrajecten waarin we je strategische routekaart ontwikkelen, knelpunten oplossen en groeikansen concreet maken. Gericht op impact en actie, niet op plannen die in de la verdwijnen.\n\n✔ Strategisch advies op maat\nAls externe sparringpartner help ik je kritisch kijken naar je positionering, processen en groeistrategie. Of het nu gaat om schaalbaarheid, marktuitbreiding of winstoptimalisatie—ik help je navigeren met een heldere blik.\n\nVoor wie?\nJe bent MKB-ondernemer en je voelt: het kan beter, anders of slimmer.\nJe wilt minder operationele druk en meer regie.\nJe zoekt rust, overzicht en een plan waar je écht op kunt bouwen.\nJe wilt groeien—maar wel op jouw voorwaarden.\n\nKlaar om de volgende stap te zetten in jouw ondernemersreis?\",\n  \"titleDescription\": \"De MKB-adviesraad brengt maandelijks ZZP en MKB ondernemers in een intervisie groep bijelkaar om in een vaste structuur van elkaar te leren en bij te dragen aan ieders zakelijke succes.\"\n}"
+            },
+            {
+              "content": "{\"icebreaker\": \"Hey Marcel, je aanpak met intervisiegroepen sprak me aan – hoe zorg je dat ondernemers daar ook echt concreet mee verder kunnen? Dacht, laat ik even contact opnemen.\"}\n\n",
+              "role": "assistant"
+            },
+            {
+              "content": "={\n{{ $json.fullName }}\n{{ $json.companyName }}\n{{ $json.title }}\n{{ $json.summary }}\n{{ $json.titleDescription }}\n}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "maxTokens": 256,
+          "temperature": 1,
+          "topP": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -784,
+        864
+      ],
+      "id": "f7468ddb-04d1-4a0d-89e3-65d7ad48ac2a",
+      "name": "Create Icebreaker First Path1",
+      "credentials": {
+        "openAiApi": {
+          "id": "jlifz8ob4mlBkT3G",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1qUhqFncirPeDsQbgdgFg_pXxd6jfD8qPMW6JXEp2uD0",
+          "mode": "list",
+          "cachedResultName": "Geen Email Gevonden",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qUhqFncirPeDsQbgdgFg_pXxd6jfD8qPMW6JXEp2uD0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qUhqFncirPeDsQbgdgFg_pXxd6jfD8qPMW6JXEp2uD0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "profileUrl": "={{ $('Get Leads').item.json.profileUrl }}",
+            "fullName": "={{ $('Set First Name and Last Name').item.json.message.content }}",
+            "firstName": "={{ $('Set First Name and Last Name').item.json.firstName }}",
+            "lastName": "={{ $('Set First Name and Last Name').item.json.lastName }}",
+            "companyName": "={{ $('Get Leads').item.json.companyName }}",
+            "title": "={{ $('Get Leads').item.json.title }}",
+            "companyId": "={{ $('Get Leads').item.json.companyId }}",
+            "companyUrl": "={{ $('Get Leads').item.json.companyUrl }}",
+            "regularCompanyUrl": "={{ $('Get Leads').item.json.regularCompanyUrl }}",
+            "summary": "={{ $('Get Leads').item.json.summary }}",
+            "titleDescription": "={{ $('Get Leads').item.json.titleDescription }}",
+            "industry": "={{ $('Get Leads').item.json.industry }}",
+            "companyLocation": "={{ $('Get Leads').item.json.companyLocation }}",
+            "location": "={{ $('Get Leads').item.json.location }}",
+            "durationInRole": "={{ $('Get Leads').item.json.durationInRole }}",
+            "durationInCompany": "={{ $('Get Leads').item.json.durationInCompany }}",
+            "pastExperienceCompanyName": "={{ $('Get Leads').item.json.pastExperienceCompanyName }}",
+            "pastExperienceCompanyUrl": "={{ $('Get Leads').item.json.pastExperienceCompanyUrl }}",
+            "pastExperienceCompanyTitle": "={{ $('Get Leads').item.json.pastExperienceCompanyTitle }}",
+            "pastExperienceDate": "={{ $('Get Leads').item.json.pastExperienceDate }}",
+            "pastExperienceDuration": "={{ $('Get Leads').item.json.pastExperienceDuration }}",
+            "connectionDegree": "={{ $('Get Leads').item.json.connectionDegree }}",
+            "profileImageUrl": "={{ $('Get Leads').item.json.profileImageUrl }}",
+            "sharedConnectionsCount": "={{ $('Get Leads').item.json.sharedConnectionsCount }}",
+            "name": "={{ $('Get Leads').item.json.name }}",
+            "vmid": "={{ $('Get Leads').item.json.vmid }}",
+            "linkedInProfileUrl": "={{ $('Get Leads').item.json.linkedInProfileUrl }}",
+            "isPremium": "={{ $('Get Leads').item.json.isPremium }}",
+            "isOpenLink": "={{ $('Get Leads').item.json.isOpenLink }}",
+            "query": "={{ $('Get Leads').item.json.query }}",
+            "timestamp": "={{ $('Get Leads').item.json.timestamp }}",
+            "defaultProfileUrl": "={{ $('Get Leads').item.json.defaultProfileUrl }}",
+            "icebreaker": "={{ $json.message.content.icebreaker }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "profileUrl",
+              "displayName": "profileUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fullName",
+              "displayName": "fullName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "firstName",
+              "displayName": "firstName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lastName",
+              "displayName": "lastName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "companyName",
+              "displayName": "companyName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "companyId",
+              "displayName": "companyId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "companyUrl",
+              "displayName": "companyUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "regularCompanyUrl",
+              "displayName": "regularCompanyUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "titleDescription",
+              "displayName": "titleDescription",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "industry",
+              "displayName": "industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "companyLocation",
+              "displayName": "companyLocation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "durationInRole",
+              "displayName": "durationInRole",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "durationInCompany",
+              "displayName": "durationInCompany",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pastExperienceCompanyName",
+              "displayName": "pastExperienceCompanyName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pastExperienceCompanyUrl",
+              "displayName": "pastExperienceCompanyUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pastExperienceCompanyTitle",
+              "displayName": "pastExperienceCompanyTitle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pastExperienceDate",
+              "displayName": "pastExperienceDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pastExperienceDuration",
+              "displayName": "pastExperienceDuration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "connectionDegree",
+              "displayName": "connectionDegree",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "profileImageUrl",
+              "displayName": "profileImageUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sharedConnectionsCount",
+              "displayName": "sharedConnectionsCount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "vmid",
+              "displayName": "vmid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "linkedInProfileUrl",
+              "displayName": "linkedInProfileUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "isPremium",
+              "displayName": "isPremium",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "isOpenLink",
+              "displayName": "isOpenLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "defaultProfileUrl",
+              "displayName": "defaultProfileUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "icebreaker",
+              "displayName": "icebreaker",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -480,
+        864
+      ],
+      "id": "9fb1f73d-d3d9-4a89-a48e-a9656b0c8026",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UxzKmtr7ulLHwHJN",
+          "name": "Ralph Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anymailfinder.com/v5.0/search/person.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={    \"company_name\": \"{{ $('Get Leads').item.json.companyName\n}}\",     \"full_name\": \"{{ $('Get Leads').item.json.fullName }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1312,
+        368
+      ],
+      "id": "dc14defd-893b-40ac-97ae-4b5bc13a0b46",
+      "name": "Find E-mail",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "ZLDVNcriHJ7RjT0T",
+          "name": "Bearer Auth account 2"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "Create Email Icebreaker",
+        "height": 168,
+        "width": 224,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        192
+      ],
+      "id": "02f9e1fa-4bb0-4e01-97c3-62fe82e7228e",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "Save Icebreaker",
+        "height": 168,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        208
+      ],
+      "id": "cb670d48-83dc-410a-9e1a-14fb79985aab",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "Create Linkedin Icebreaker",
+        "height": 168,
+        "width": 224,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        784
+      ],
+      "id": "ef58d65e-a94d-4cb8-9654-e638651555f3",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "Input a scraped Lead list from google sheets.\n\nLead lists are made with Phantombuster & Linkedin Sales Navigator\n\nYou will have to link your google sheets account to n8n and set the settings of the module (Double click on it) to:\n\nResource :\nSheet Within Document\n\nOperation:\nGet Row(s)\n\nDocument:\nFrom list\n{SELECT SHEET file}\n\nSheet:\nFrom list:\n{SHEET}\n",
+        "height": 632,
+        "width": 166,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2480,
+        496
+      ],
+      "id": "902e33e4-80ff-4a4d-8219-90d9487fe844",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Determine how many emails to write per execution, Try to keep betweeen 1-500, If you do more you might get a rate limit error.\n\nUse following sequence or alike :\n1-500\n499-1000\n999-1500\n1499-2000\n1999-2500",
+        "height": 296,
+        "width": 166,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1856,
+        560
+      ],
+      "id": "531345e8-e20c-4c67-8088-593701632e49",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Set bearer auth token from anymailfinder\n",
+        "height": 168,
+        "width": 160,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        560
+      ],
+      "id": "97f99725-03cb-4f72-b2ca-8e54a1cabbe9",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "You will have to enter a private key from neverbounce to check if the email is safe/healthy in the link at the end you'll see \"key=\" then you need to add a private key after it, you can copy it from neverbounce e.g private_hfsodufdiusdfbousbdhfushdbfodusbfsp\n\n\nhttps://api.neverbounce.com/v4/single/check?key=private_hfsodufdiusdfbousbdhfushdbfodusbfsp",
+        "height": 168,
+        "width": 464,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1504,
+        560
+      ],
+      "id": "49f2c092-d779-43cd-b137-ab187857e950",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "Link your chatgpt API Key\n",
+        "height": 168,
+        "width": 160,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        592
+      ],
+      "id": "4a5421af-7ede-409e-81fb-abca07888e3e",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "content": "Setup bearer auth key, \ne.g :\nat the Name : Authorisation\nvalue : \ncurrently empty, replace with\nBearer Njcy.... (Your key)\n\nThen at the bottom when you are in the node, You need to select the campaign in which you want the leads to go\n\nYou can see the campaign ID in the url when you have instantly open, e.g\nhttps://app.instantly.ai/app/campaign/4d983305-5a5e-45cc-8e05-11be9834e5c2/leads\n\nwhere \"4d983305-5a5e-45cc-8e05-11be9834e5c2\" \nis the campaign ID, Just copy that part of the link\nAnd place it in the \"\" in the body at {\n\"campaign\":\"\",",
+        "height": 408,
+        "width": 448,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        496
+      ],
+      "id": "428f7258-73b0-4cbb-9fa5-c173d6e68b4e",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "content": "For each lead file, Create a new sheet in the document and set the node to that sheet",
+        "height": 184,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        832
+      ],
+      "id": "0f2fbb2c-fdbe-4561-b77a-3c7e682d54af",
+      "name": "Sticky Note19"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Format Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Leads": {
+      "main": [
+        [
+          {
+            "node": "Filter Leads Without Necessary Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Leads Without Necessary Info": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Name": {
+      "main": [
+        [
+          {
+            "node": "Set First Name and Last Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set First Name and Last Name": {
+      "main": [
+        [
+          {
+            "node": "Find E-mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Icebreaker First Path": {
+      "main": [
+        [
+          {
+            "node": "Set Icebreaker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Icebreaker": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Neverbounce": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Create Icebreaker First Path",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Icebreaker First Path1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Neverbounce",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Icebreaker First Path1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Icebreaker First Path1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find E-mail": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Icebreaker First Path1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "64e43ca6-85a4-4ce2-aede-df8bbfd2382c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8d8bf94a246b50082da2a0a8ca8423cdbf757248e37fe81ee3bef5222289f1a0"
+  },
+  "id": "ZaOC8FkoMPk3Gpvc",
+  "tags": [
+    {
+      "createdAt": "2025-09-08T12:26:22.774Z",
+      "updatedAt": "2025-09-08T12:26:22.774Z",
+      "id": "vVBOPH9RrJG1wCjA",
+      "name": "AiWebSolutions"
+    }
+  ]
+}
